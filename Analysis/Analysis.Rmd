@@ -24,7 +24,7 @@ my_gapminder <- read.csv("../Data/my_gapminder.csv")
 ```{r}
 # Initiate an empty list to store the CV MSE data
 cv_estimate <- list()
-# Number to record the trials
+# Number to record the trials with same values of k
 trial <- 1
 # Iterate through k in values of 2, 5 and 10. For each k iterate 30 times and 
 #   for record every estimated CV MSE in cv_estimate
