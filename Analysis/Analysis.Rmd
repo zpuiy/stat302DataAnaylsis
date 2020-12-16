@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Analysis"
 author: "Peiyao Zhu (Noel)"
 date: "12/16/2020"
 output: html_document
@@ -7,9 +7,14 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+# Load the my_rf_cv function
 source('../Code/my_rf_cv.R')
+# Load all packages
 library(ggplot2)
 library(dplyr)
+# Read the my_penguins and my_gapminder data
+my_penguins <- read.csv("../Data/my_penguins.csv")
+my_gapminder <- read.csv("../Data/my_gapminder.csv")
 ```
 
 * Predict `body_mass_g` using covariates `bill_length_mm`, `bill_depth_mm`, and `flipper_length_mm`. 
@@ -17,8 +22,12 @@ library(dplyr)
     * For each value of `k`, run your function $30$ times. 
     * For each of the $30$ iterations, store the CV estimated MSE.
 ```{r}
+# Initiate an empty list to store the CV MSE data
 cv_estimate <- list()
+# Number to record the trials
 trial <- 1
+# Iterate through k in values of 2, 5 and 10. For each k iterate 30 times and 
+#   for record every estimated CV MSE in cv_estimate
 for (i in c(2, 5, 10)) {
   mse <- rep(NA, 30)
   for (j in 1:30) {
@@ -31,21 +40,27 @@ for (i in c(2, 5, 10)) {
 
 * Use `ggplot2` with 3 boxplots to display these data in an informative way. There should be a boxplot associated with each value of `k`, representing $30$ simulations each.
 ```{r}
+# Store all the CV MSE data in a data frame with their according k value called
+#   my_cv
 category <- c(rep("2", 30), rep("5", 30), rep("10", 30))
 mse <- c(cv_estimate[[1]], cv_estimate[[2]], cv_estimate[[3]])
 my_cv <- data.frame("k" = category, "CV_MSE" = mse)
+# Plot 3 separate boxplots for CV MSE of different k value and save the plot as
+#   mse_by_k
 mse_by_k <- ggplot(data = my_cv, aes(x = k, y = CV_MSE)) +
   geom_boxplot(aes(group = k), fill = "lightblue") +
   labs(title = "CV MSE by k value", 
-       x = "", 
-       y = "") +
-  theme(plot.title =
-          element_text(hjust = 0.5))
-ggsave("mse_by_k.png", path = "../Output/Figures")
+       x = "k vlaue", 
+       y = "CV MSE") +
+  theme(plot.title = element_text(hjust = 0.5))
+# Save mse_by_k as mse_by_k.png in Figures folder
+ggsave("mse_by_k.png", path = "../Output/Figures", plot = mse_by_k)
 ```
 
 * Use a table to display the average CV estimate and the standard deviation of the CV estimates across $k$. Your table should have 3 rows (one for each value of $k$) and 2 columns (one for the mean and the other for the standard deviation).
 ```{r}
+# Store the average CV MSE and their according standard deviation in a data
+#   frame called average_cv
 average_cv <- matrix(NA, nrow = 3, ncol = 2)
 rownames(average_cv) <- c("k = 2", "k = 5", "k = 10")
 colnames(average_cv) <- c("average CV MSE", "standard deviation")
@@ -56,9 +71,12 @@ average_cv[2, 2] <- sd(cv_estimate[[2]])
 average_cv[3, 1] <- mean(cv_estimate[[3]])
 average_cv[3, 2] <- sd(cv_estimate[[3]])
 average_cv <- as.data.frame(average_cv)
+# Save average_cv as summary_mse.rds in the Results folder
 saveRDS(average_cv, file = "../Output/Results/summary_mse.rds")
-
+# Put all statistical results in a data frame with their according k values in
+#   a data frame called all_mse
 all_mse <- cbind(cv_estimate[[1]], cv_estimate[[2]], cv_estimate[[3]])
 colnames(all_mse) <- c("k = 2", "k = 5", "k = 10")
+# Save all_mse as all_mse.csv in the Results folder
 write.csv(all_mse, file = "../Output/Results/all_mse.csv")
 ```
